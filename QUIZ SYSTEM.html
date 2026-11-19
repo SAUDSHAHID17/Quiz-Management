@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>University Quiz Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ================= THEMES (switch from the dots in the header) ================= */
+:root,[data-theme="university"]{
+  --bg:#f3f0e8;--bg2:#e9e4d6;--card:#ffffff;--text:#1b2540;--muted:#69708a;
+  --primary:#1e3a8a;--primary-d:#162c6b;--accent:#c9a227;--soft:#e9eefb;--line:#e6e2d7;
+  --hero:linear-gradient(135deg,#12245a 0%,#1e3a8a 55%,#3a5cc7 100%);
+  --shadow:0 10px 34px rgba(20,39,94,.10);--ok:#15803d;--bad:#dc2626;--on:#fff;--blob:.16}
+[data-theme="ocean"]{--bg:#ecf6fa;--bg2:#d9ecf4;--primary:#0369a1;--primary-d:#075985;--accent:#06b6d4;--soft:#e0f2fe;--line:#d3e5ee;
+  --hero:linear-gradient(135deg,#0b3b5a,#0369a1 55%,#06b6d4);--shadow:0 10px 34px rgba(3,105,161,.12)}
+[data-theme="emerald"]{--bg:#eef7f2;--bg2:#dcefe4;--primary:#047857;--primary-d:#065f46;--accent:#f59e0b;--soft:#dcfce7;--line:#d3e8dc;
+  --hero:linear-gradient(135deg,#064e3b,#047857 55%,#10b981);--shadow:0 10px 34px rgba(4,120,87,.12)}
+[data-theme="sunset"]{--bg:#fff4ee;--bg2:#fde6d8;--primary:#ea580c;--primary-d:#c2410c;--accent:#db2777;--soft:#ffedd5;--line:#f4dccb;
+  --hero:linear-gradient(135deg,#be123c,#ea580c 60%,#f59e0b);--shadow:0 10px 34px rgba(234,88,12,.14)}
+[data-theme="royal"]{--bg:#f3effc;--bg2:#e6defa;--primary:#6d28d9;--primary-d:#5b21b6;--accent:#ec4899;--soft:#ede9fe;--line:#e2d9f7;
+  --hero:linear-gradient(135deg,#3b0f8f,#6d28d9 55%,#a855f7);--shadow:0 10px 34px rgba(109,40,217,.14)}
+[data-theme="dark"]{--bg:#0c1120;--bg2:#121a30;--card:#171f38;--text:#e9edff;--muted:#9aa5cb;--primary:#6366f1;--primary-d:#4f46e5;
+  --accent:#22d3ee;--soft:#222c52;--line:#28345c;--hero:linear-gradient(135deg,#1a2150,#3730a3 55%,#7c3aed);
+  --shadow:0 10px 34px rgba(0,0,0,.45);--ok:#22c55e;--bad:#f87171;--blob:.28}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:"Poppins","Segoe UI",system-ui,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .4s,color .4s}
+body::before,body::after{content:"";position:fixed;z-index:-1;border-radius:50%;filter:blur(90px);opacity:var(--blob);pointer-events:none}
+body::before{width:440px;height:440px;background:var(--primary);top:-140px;right:-120px;animation:float 14s ease-in-out infinite}
+body::after{width:380px;height:380px;background:var(--accent);bottom:-140px;left:-120px;animation:float 18s ease-in-out infinite reverse}
+@keyframes float{50%{transform:translate(50px,34px) scale(1.12)}}
+
+/* ----- header ----- */
+header.top{position:sticky;top:0;z-index:20;background:var(--hero);color:#fff;padding:12px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+  border-bottom:3px solid var(--accent);box-shadow:0 6px 22px rgba(0,0,0,.18)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .logo{font-size:30px;background:rgba(255,255,255,.16);border-radius:12px;width:46px;height:46px;display:grid;place-items:center;animation:pop .8s both}
+.brand h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.2px}
+.brand small{opacity:.8;font-size:12px}
+.who{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:14px}
+.chip{background:rgba(255,255,255,.16);padding:6px 14px;border-radius:30px}
+.themes{display:flex;gap:7px;background:rgba(255,255,255,.14);padding:6px 10px;border-radius:30px}
+.swatch{width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.7);cursor:pointer;padding:0;transition:.2s}
+.swatch:hover{transform:scale(1.35)}
+.swatch.on{outline:2px solid #fff;outline-offset:2px;transform:scale(1.2)}
+
+.wrap{max-width:1100px;margin:28px auto;padding:0 16px}
+.wrap.fade>*{animation:fadeUp .55s both}
+.wrap.fade>*:nth-child(2){animation-delay:.07s}.wrap.fade>*:nth-child(3){animation-delay:.14s}
+.wrap.fade>*:nth-child(4){animation-delay:.21s}.wrap.fade>*:nth-child(5){animation-delay:.28s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.5) rotate(-20deg)}to{opacity:1;transform:none}}
+
+/* ----- cards / banner ----- */
+.card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:26px;margin-bottom:22px;border:1px solid var(--line);transition:box-shadow .3s,border-color .3s}
+.card:hover{border-color:color-mix(in srgb,var(--primary) 35%,var(--line))}
+.card h2{margin-top:0;font-weight:700}
+.banner{background:var(--hero);color:#fff;border-radius:20px;padding:30px 32px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+  position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.banner::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.10);animation:float 10s ease-in-out infinite}
+.banner h2{margin:0 0 6px;font-size:24px}.banner p{margin:0;opacity:.85}
+.banner>*{position:relative;z-index:1}
+.codeform{display:flex;gap:10px;flex:0 0 auto}
+.codeform .btn{white-space:nowrap}
+.codeform input{width:170px;flex:0 0 170px;text-transform:uppercase;letter-spacing:2px;font-weight:700;text-align:center;border:none}
+
+/* ----- forms ----- */
+label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px;color:var(--muted)}
+input[type=text],input[type=password],input[type=number],select,textarea{width:100%;padding:11px 14px;border:1.8px solid var(--line);border-radius:12px;font-size:15px;font-family:inherit;background:var(--card);color:var(--text);transition:.2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 18%,transparent)}
+input:disabled{opacity:.55}
+/* range sliders */
+.range-wrap{display:flex;align-items:center;gap:16px}
+.range-val{min-width:78px;text-align:center;font-weight:800;color:var(--primary);background:var(--soft);padding:7px 12px;border-radius:12px;transition:.2s}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:9px;border-radius:9px;cursor:pointer;padding:0;border:none;
+  background:linear-gradient(90deg,var(--primary) var(--p,50%),var(--soft) var(--p,50%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;border:5px solid var(--primary);box-shadow:0 3px 10px rgba(0,0,0,.25);transition:.15s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:5px solid var(--primary);box-shadow:0 3px 10px rgba(0,0,0,.25)}
+input[type=range]:focus{box-shadow:none}
+
+/* ----- buttons ----- */
+.btn{position:relative;overflow:hidden;border:none;border-radius:12px;padding:10px 20px;font-size:15px;font-weight:600;cursor:pointer;background:var(--soft);color:var(--text);font-family:inherit;
+  transition:transform .18s,box-shadow .18s,filter .18s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(0,0,0,.14)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn.primary{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff}
+.btn.ok{background:linear-gradient(135deg,#22c55e,#15803d);color:#fff}
+.btn.danger{background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff}
+.btn.light{background:rgba(255,255,255,.95);color:#1b2540}
+.btn.sm{padding:6px 13px;font-size:13px;border-radius:10px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.5);transform:scale(0);animation:rip .6s linear;pointer-events:none}
+@keyframes rip{to{transform:scale(3);opacity:0}}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.grow{flex:1}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;background:var(--card);padding:8px;border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.nav .btn{background:transparent}
+.nav .btn:hover{background:var(--soft);box-shadow:none}
+.nav .btn.on{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff}
+
+/* ----- tables ----- */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{background:var(--soft);color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+tr{animation:fadeUp .45s both}
+tr:nth-child(2){animation-delay:.04s}tr:nth-child(3){animation-delay:.08s}tr:nth-child(4){animation-delay:.12s}tr:nth-child(5){animation-delay:.16s}tr:nth-child(6){animation-delay:.2s}
+tr:hover td{background:var(--soft)}
+td input{padding:7px 10px;font-size:14px}
+.table-scroll{overflow-x:auto}
+.form2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.form2 .full{grid-column:1/-1}
+.form3{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:0 16px;align-items:end}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px!important}
+.chips span{background:rgba(255,255,255,.18);padding:4px 13px;border-radius:20px;font-size:13px}
+td select{padding:7px 8px;font-size:14px;min-width:120px}
+
+/* ----- stats / actions ----- */
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:22px}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:22px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;text-align:center;color:var(--muted);font-weight:600;box-shadow:var(--shadow);transition:transform .25s,box-shadow .25s}
+.stat:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 16px 36px rgba(0,0,0,.16)}
+.stat b{display:block;font-size:34px;color:var(--primary);margin:4px 0}
+.stat .ic{font-size:28px;display:inline-block;transition:.3s}
+.stat:hover .ic{transform:scale(1.3) rotate(-8deg)}
+.action{background:var(--soft);border-radius:16px;padding:20px;cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:.25s;border:2px solid transparent}
+.action span{font-size:30px;transition:.3s}
+.action small{color:var(--muted)}
+.action:hover{transform:translateY(-5px);border-color:var(--primary);box-shadow:var(--shadow)}
+.action:hover span{transform:scale(1.25) rotate(8deg)}
+
+/* ----- wizard ----- */
+.steps{display:flex;gap:8px;margin-bottom:22px}
+.steps div{flex:1;text-align:center;padding:9px 4px;border-radius:12px;background:var(--soft);color:var(--muted);font-size:13px;font-weight:600;transition:.3s}
+.steps div.on{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff;transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.steps div.done{background:color-mix(in srgb,var(--primary) 25%,var(--soft));color:var(--primary)}
+
+/* ----- quiz ----- */
+.qcard.in-r{animation:slideR .45s both}.qcard.in-l{animation:slideL .45s both}
+@keyframes slideR{from{opacity:0;transform:translateX(70px)}to{opacity:1;transform:none}}
+@keyframes slideL{from{opacity:0;transform:translateX(-70px)}to{opacity:1;transform:none}}
+.opt{display:flex;align-items:center;gap:14px;border:2px solid var(--line);border-radius:14px;padding:14px 18px;margin:11px 0;cursor:pointer;font-size:16px;transition:.2s;position:relative;background:var(--card)}
+.opt:hover{border-color:var(--primary);transform:translateX(8px);box-shadow:var(--shadow)}
+.opt.sel{border-color:var(--primary);background:var(--soft)}
+.opt.sel::after{content:"✓";position:absolute;right:16px;width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;font-size:14px;animation:pop .3s both}
+.opt input{width:18px;height:18px;accent-color:var(--primary)}
+.timer{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;background:var(--soft);padding:7px 18px;border-radius:30px;color:var(--primary)}
+.timer.low{background:#fee2e2;color:#dc2626;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.55;transform:scale(1.06)}}
+.bar{height:8px;background:var(--soft);border-radius:8px;overflow:hidden;margin:14px 0}
+.bar div{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));transition:.4s;border-radius:8px}
+.timebar{height:6px;background:var(--soft);border-radius:6px;overflow:hidden;margin-top:14px}
+.timebar div{height:100%;background:linear-gradient(90deg,var(--ok),var(--accent));transition:width .3s linear}
+.timebar.low div{background:#dc2626}
+.dots{display:flex;gap:7px;flex-wrap:wrap;margin-top:18px}
+.dots span{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;background:var(--soft);cursor:pointer;transition:.2s}
+.dots span:hover{transform:translateY(-3px);background:color-mix(in srgb,var(--primary) 30%,var(--soft))}
+.dots span.ans{background:var(--primary);color:#fff}
+.dots span.cur{outline:3px solid var(--accent);outline-offset:2px}
+
+/* ----- result ----- */
+@property --pct{syntax:'<number>';inherits:false;initial-value:0}
+.ring{width:170px;height:170px;border-radius:50%;margin:14px auto;background:conic-gradient(var(--primary) calc(var(--pct)*1%),var(--soft) 0);display:grid;place-items:center;animation:ringIn 1.4s ease-out both}
+@keyframes ringIn{from{--pct:0}}
+.ring span{width:136px;height:136px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-size:34px;font-weight:800;color:var(--primary)}
+.big{font-size:44px;font-weight:800;color:var(--primary);margin:0}
+.badge{display:inline-block;padding:3px 11px;border-radius:20px;font-size:12px;font-weight:700}
+.badge.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.badge.bad{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
+.code-box{display:inline-block;font-size:36px;font-weight:800;letter-spacing:5px;background:var(--soft);color:var(--primary);padding:16px 34px;border-radius:16px;border:2px dashed var(--primary);animation:pop .6s both}
+.review{border-left:5px solid var(--line);padding:10px 16px;margin:12px 0;background:var(--soft);border-radius:8px;transition:.2s}
+.review:hover{transform:translateX(5px)}
+.review.ok{border-color:var(--ok)}.review.bad{border-color:var(--bad)}
+.muted{color:var(--muted)}
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(30px);background:#1b2540;color:#fff;padding:13px 24px;border-radius:30px;opacity:0;pointer-events:none;transition:.35s;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+#toast.show{opacity:1;transform:translateX(-50%)}
+#toast.err{background:#dc2626}
+
+/* ----- login + hero slider ----- */
+.auth{display:grid;grid-template-columns:1.15fr .85fr;gap:26px;align-items:stretch;margin-top:10px}
+.slider{position:relative;overflow:hidden;border-radius:24px;background:var(--hero);color:#fff;min-height:460px;box-shadow:var(--shadow)}
+.slider::before,.slider::after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.09)}
+.slider::before{width:300px;height:300px;right:-90px;top:-90px;animation:float 9s ease-in-out infinite}
+.slider::after{width:200px;height:200px;left:-60px;bottom:-60px;animation:float 12s ease-in-out infinite reverse}
+.slides{display:flex;height:100%;min-height:460px;transition:transform .7s cubic-bezier(.65,0,.35,1)}
+.slide{min-width:100%;padding:56px 76px 80px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:1}
+.slide .em{font-size:76px;display:inline-block;animation:bounce 3s ease-in-out infinite}
+@keyframes bounce{50%{transform:translateY(-14px) rotate(5deg)}}
+.slide h3{font-size:28px;margin:18px 0 10px}
+.slide p{font-size:16px;opacity:.88;max-width:420px;line-height:1.6}
+.sl-arrow{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:none;background:rgba(255,255,255,.2);color:#fff;font-size:24px;cursor:pointer;z-index:3;transition:.2s}
+.sl-arrow:hover{background:rgba(255,255,255,.4);transform:translateY(-50%) scale(1.15)}
+.sl-arrow.l{left:14px}.sl-arrow.r{right:14px}
+.sl-dots{position:absolute;bottom:22px;left:0;right:0;display:flex;justify-content:center;gap:9px;z-index:3}
+.sl-dots i{width:10px;height:10px;border-radius:10px;background:rgba(255,255,255,.4);cursor:pointer;transition:.35s}
+.sl-dots i.on{width:32px;background:#fff}
+.auth .login-box{margin:0;max-width:none;align-self:center;width:100%}
+.tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--soft);padding:5px;border-radius:14px}
+.tabs button{flex:1;padding:10px;border:none;background:transparent;border-radius:10px;cursor:pointer;font-weight:600;color:var(--muted);font-family:inherit;transition:.25s}
+.tabs button.on{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff;box-shadow:0 6px 14px rgba(0,0,0,.18)}
+.tabs button:hover:not(.on){color:var(--primary)}
+
+/* ----- congratulations ----- */
+.congrats{position:fixed;inset:0;background:radial-gradient(circle at 50% 30%,#7c3aed,#312e81 70%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:50;overflow:hidden;padding:20px}
+.congrats h1{font-size:clamp(32px,6vw,60px);margin:10px 0;animation:pop .8s both}
+.congrats .trophy{font-size:110px;animation:bounce 1.4s infinite}
+.confetti{position:absolute;top:-20px;width:10px;height:16px;opacity:.9;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+@media(max-width:860px){.auth{grid-template-columns:1fr}.slider,.slides{min-height:340px}.slide{padding:40px 30px 70px}header.top{padding:10px 14px}}
+@media(max-width:600px){.card{padding:18px}.steps div{font-size:11px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ============================================================================
+   QUIZ MANAGEMENT SYSTEM  (JavaScript OOP version)
+
+   ENCAPSULATION : private fields (#name) + getters/setters in every class.
+   INHERITANCE   : Admin, Student  extend  User
+                   MCQQuestion, TrueFalseQuestion  extend  Question
+   POLYMORPHISM  : question.render()/isCorrect()/correctText() behave
+                   differently per question type; user.openDashboard() is
+                   different for Admin and Student.
+   ABSTRACTION   : User and Question are abstract (cannot be instantiated);
+                   QuizSystem hides storage (localStorage) and CSV export.
+
+   Admin login: admin / admin123
+   ========================================================================== */
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = id => document.getElementById(id);
+const fmt = sec => { sec = Math.max(0, sec); return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0'); };
+const LETTERS = ['A','B','C','D'];
+const PROGRAMS = ['BS Computer Science', 'BS Software Engineering', 'BS Information Technology', 'BS Cyber Security', 'BS Artificial Intelligence', 'BS Data Science',
+                  'BBA', 'BS Electrical Engineering', 'BS Mathematics', 'MS Computer Science'];
+const SEMESTERS = ['1', '2', '3', '4', '5', '6', '7', '8'];
+const validPhone = p => /^\+?\d[\d\s-]{9,14}$/.test(p);
+const phoneCell = p => p ? '="' + p + '"' : '';          // keeps the leading 0 in Excel
+const dash = v => v ? esc(v) : '—';
+const semSelect = (id, sel) => `<select id="${id}"><option value="">Select</option>${SEMESTERS.map(s => `<option value="${s}" ${s === String(sel) ? 'selected' : ''}>Semester ${s}</option>`).join('')}</select>`;
+const progDatalist = `<datalist id="proglist">${PROGRAMS.map(p => `<option value="${p}">`).join('')}</datalist>`;
+
+/* ------------------------------ QUESTIONS ---------------------------------- */
+class Question {                                   // ABSTRACT class
+  #text;
+  constructor(text) {
+    if (new.target === Question) throw new TypeError('Question is abstract and cannot be instantiated');
+    this.#text = text;
+  }
+  get text() { return this.#text; }
+  set text(v) { this.#text = v; }
+  // abstract members - every subclass must provide them
+  get type()          { throw new Error('abstract'); }
+  get choices()       { throw new Error('abstract'); }
+  isCorrect(index)    { throw new Error('abstract'); }
+  correctText()       { throw new Error('abstract'); }
+  toJSON()            { throw new Error('abstract'); }
+  // shared behaviour (polymorphic through this.choices)
+  render(selected) {
+    return this.choices.map((c, i) =>
+      `<label class="opt ${selected === i ? 'sel' : ''}">
+         <input type="radio" name="ans" ${selected === i ? 'checked' : ''} onchange="pick(${i})">
+         <span><b>${this.type === 'MCQ' ? LETTERS[i] + ')' : ''}</b> ${esc(c)}</span>
+       </label>`).join('');
+  }
+  static fromJSON(o) {                             // factory
+    return o.type === 'MCQ' ? new MCQQuestion(o.text, o.options, o.correct) : new TrueFalseQuestion(o.text, o.correct);
+  }
+}
+class MCQQuestion extends Question {               // INHERITANCE
+  #options; #correct;
+  constructor(text, options, correct) { super(text); this.#options = options; this.#correct = correct; }
+  get type() { return 'MCQ'; }
+  get choices() { return this.#options; }
+  isCorrect(i) { return i === this.#correct; }
+  correctText() { return LETTERS[this.#correct] + ') ' + this.#options[this.#correct]; }
+  toJSON() { return { type: 'MCQ', text: this.text, options: this.#options, correct: this.#correct }; }
+}
+class TrueFalseQuestion extends Question {
+  #correct;                                        // boolean
+  constructor(text, correct) { super(text); this.#correct = correct; }
+  get type() { return 'TF'; }
+  get choices() { return ['True', 'False']; }
+  isCorrect(i) { return i === (this.#correct ? 0 : 1); }
+  correctText() { return this.#correct ? 'True' : 'False'; }
+  toJSON() { return { type: 'TF', text: this.text, correct: this.#correct }; }
+}
+
+/* -------------------------------- QUIZ ------------------------------------- */
+class Quiz {
+  #code; #title; #minutes; #questions;
+  constructor(code, title, minutes, questions = []) {
+    this.#code = code; this.#title = title; this.#minutes = minutes; this.#questions = questions;
+  }
+  get code() { return this.#code; }          set code(v) { this.#code = v; }
+  get title() { return this.#title; }        set title(v) { this.#title = v; }
+  get minutes() { return this.#minutes; }    set minutes(v) { this.#minutes = v; }
+  get questions() { return this.#questions; } set questions(v) { this.#questions = v; }
+  get count() { return this.#questions.length; }
+  toJSON() { return { code: this.#code, title: this.#title, minutes: this.#minutes, questions: this.#questions.map(q => q.toJSON()) }; }
+  static fromJSON(o) { return new Quiz(o.code, o.title, o.minutes, o.questions.map(Question.fromJSON)); }
+}
+
+/* ------------------------------- RESULT ------------------------------------ */
+class Result {
+  #d;
+  constructor(d) { this.#d = { ...d }; }
+  get username() { return this.#d.username; }  get name() { return this.#d.name; }
+  get roll() { return this.#d.roll; }          get code() { return this.#d.code; }
+  get title() { return this.#d.title; }        get score() { return this.#d.score; }
+  get total() { return this.#d.total; }        get seconds() { return this.#d.seconds; }
+  get date() { return this.#d.date; }
+  get program() { return this.#d.program || ''; }   get semester() { return this.#d.semester || ''; }
+  get cls() { return this.#d.cls || ''; }           get phone() { return this.#d.phone || ''; }
+  get percent() { return this.#d.total ? Math.round(1000 * this.#d.score / this.#d.total) / 10 : 0; }
+  setIdentity(s) { this.#d.name = s.fullName; this.#d.roll = s.roll; this.#d.program = s.program; this.#d.semester = s.semester; this.#d.cls = s.cls; this.#d.phone = s.phone; }
+  toJSON() { return this.#d; }
+}
+
+/* -------------------------------- USERS ------------------------------------ */
+class User {                                       // ABSTRACT class
+  #username; #password; #fullName;
+  constructor(username, password, fullName) {
+    if (new.target === User) throw new TypeError('User is abstract and cannot be instantiated');
+    this.#username = username; this.#password = password; this.#fullName = fullName;
+  }
+  get username() { return this.#username; }
+  get password() { return this.#password; }  set password(v) { this.#password = v; }
+  get fullName() { return this.#fullName; }  set fullName(v) { this.#fullName = v; }
+  checkPassword(p) { return this.#password === p; }
+  get role() { throw new Error('abstract'); }
+  openDashboard() { throw new Error('abstract'); }  // polymorphic
+}
+class Admin extends User {
+  constructor() { super('admin', 'admin123', 'Administrator'); }
+  get role() { return 'Admin'; }
+  openDashboard() { showAdmin('home'); }
+}
+class Student extends User {
+  #roll; #program; #semester; #cls; #phone;
+  constructor(username, password, fullName, roll, info = {}) {
+    super(username, password, fullName);
+    this.#roll = roll; this.#program = info.program || ''; this.#semester = info.semester || '';
+    this.#cls = info.cls || ''; this.#phone = info.phone || '';
+  }
+  get roll() { return this.#roll; }          set roll(v) { this.#roll = v; }
+  get program() { return this.#program; }    set program(v) { this.#program = v; }
+  get semester() { return this.#semester; }  set semester(v) { this.#semester = v; }
+  get cls() { return this.#cls; }            set cls(v) { this.#cls = v; }
+  get phone() { return this.#phone; }        set phone(v) { this.#phone = v; }
+  get role() { return 'Student'; }
+  openDashboard() { showStudent(); }
+  toJSON() { return { u: this.username, p: this.password, n: this.fullName, r: this.#roll, pg: this.#program, sm: this.#semester, cl: this.#cls, ph: this.#phone }; }
+}
+
+/* ----------------------------- QUIZ SYSTEM --------------------------------- */
+class QuizSystem {                                 // hides storage + export details
+  static KEY = 'qms_v2';
+  #students = []; #quizzes = []; #results = [];
+  constructor() {
+    try {
+      const d = JSON.parse(localStorage.getItem(QuizSystem.KEY));
+      if (d) {
+        this.#students = (d.students || []).map(s => new Student(s.u, s.p, s.n, s.r, { program: s.pg, semester: s.sm, cls: s.cl, phone: s.ph }));
+        this.#quizzes = (d.quizzes || []).map(Quiz.fromJSON);
+        this.#results = (d.results || []).map(r => new Result(r));
+      }
+    } catch (e) { /* start empty */ }
+  }
+  save() {
+    localStorage.setItem(QuizSystem.KEY, JSON.stringify({ students: this.#students, quizzes: this.#quizzes, results: this.#results }));
+  }
+  get students() { return this.#students; }
+  get quizzes() { return this.#quizzes; }
+  get results() { return this.#results; }
+  findStudent(u) { return this.#students.find(s => s.username.toLowerCase() === u.toLowerCase()); }
+  findQuiz(code) { return this.#quizzes.find(q => q.code === code.trim().toUpperCase()); }
+  hasAttempted(u, code) { return this.#results.some(r => r.username === u && r.code === code); }
+  genCode() { let c; do { c = 'QZ' + (1000 + Math.floor(Math.random() * 9000)); } while (this.findQuiz(c)); return c; }
+  addStudent(s) { this.#students.push(s); this.save(); }
+  removeStudent(i) { this.#students.splice(i, 1); this.save(); }
+  addQuiz(q) { this.#quizzes.push(q); this.save(); }
+  removeQuiz(i) { this.#quizzes.splice(i, 1); this.save(); }
+  addResult(r) { this.#results.push(r); this.save(); }
+  syncStudent(s) { this.#results.forEach(r => { if (r.username === s.username) r.setIdentity(s); }); this.save(); }
+  // ---- Excel export (CSV opens directly in Excel) ----
+  #download(filename, rows) {
+    const cell = v => '"' + String(v).replace(/"/g, '""') + '"';
+    const csv = '﻿' + rows.map(r => r.map(cell).join(',')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  }
+  exportStudents() {
+    this.#download('Students_Data.csv', [['Username', 'Full Name', 'Roll No', 'Program', 'Semester', 'Class / Section', 'Phone', 'Password', 'Quizzes Attempted'],
+      ...this.#students.map(s => [s.username, s.fullName, s.roll, s.program, s.semester, s.cls, phoneCell(s.phone), s.password, this.#results.filter(r => r.username === s.username).length])]);
+  }
+  exportResults(code = '') {
+    const list = this.#results.filter(r => !code || r.code === code);
+    this.#download('Quiz_Results.csv', [['Username', 'Full Name', 'Roll No', 'Program', 'Semester', 'Class / Section', 'Phone', 'Quiz Code', 'Quiz Title', 'Score', 'Total', 'Percentage', 'Time Taken', 'Date'],
+      ...list.map(r => [r.username, r.name, r.roll, r.program, r.semester, r.cls, phoneCell(r.phone), r.code, r.title, r.score, r.total, r.percent + '%', fmt(r.seconds), r.date])]);
+  }
+}
+
+/* ============================= UI / CONTROLLER ============================== */
+const sys = new QuizSystem();
+let session = null;     // current User object (Admin or Student)
+let draft = null;       // quiz being created / edited
+let run = null;         // quiz attempt in progress
+let lastRun = null;     // details of the last finished attempt
+
+function toast(msg, err = false) {
+  const t = $('toast'); t.textContent = msg; t.className = 'show' + (err ? ' err' : '');
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.className = '', 2600);
+}
+function page(inner, nav = '', noFade = false) {
+  if (heroTimer) { clearInterval(heroTimer); heroTimer = null; }
+  $('app').innerHTML = `
+    <header class="top"><div class="brand"><span class="logo">🎓</span><div><h1>University Quiz Portal</h1><small>Quiz Management System</small></div></div>
+      <div class="who">${themePicker()}${session ? `<span class="chip">${esc(session.role)}: <b>${esc(session.fullName)}</b></span><button class="btn sm light" onclick="logout()">Logout</button>` : ''}</div>
+    </header><div class="wrap ${noFade ? '' : 'fade'}">${nav}${inner}</div>`;
+  runCounters();
+}
+
+/* ------------------------------- LOGIN ------------------------------------- */
+function showLogin(tab = 'student') {
+  session = null; sessionStorage.removeItem('qms_session');
+  const forms = {
+    student: `<label>Username</label><input type="text" id="lu" autocomplete="off" placeholder="Your username">
+              <label>Password</label><input type="password" id="lp" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin('student')">
+              <p><button class="btn primary" style="width:100%" onclick="doLogin('student')">Student Login →</button></p>`,
+    admin: `<label>Admin username</label><input type="text" id="lu" autocomplete="off" placeholder="admin">
+              <label>Password</label><input type="password" id="lp" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin('admin')">
+              <p><button class="btn primary" style="width:100%" onclick="doLogin('admin')">Admin Login →</button></p>
+              <p class="muted" style="font-size:13px">Default: admin / admin123</p>`,
+    register: `<div class="form2">
+              <div class="full"><label>Full name</label><input type="text" id="rn" placeholder="e.g. Ali Khan"></div>
+              <div><label>Roll number</label><input type="text" id="rr" placeholder="e.g. CS-2024-01"></div>
+              <div><label>Phone number</label><input type="text" id="rph" placeholder="03XX-XXXXXXX"></div>
+              <div class="full"><label>Program</label><input type="text" id="rpg" list="proglist" placeholder="Select or type your program">${progDatalist}</div>
+              <div><label>Semester</label>${semSelect('rsm', '')}</div>
+              <div><label>Class / Section</label><input type="text" id="rcl" placeholder="e.g. A"></div>
+              <div><label>Username</label><input type="text" id="ru" autocomplete="off"></div>
+              <div><label>Password</label><input type="password" id="rp"></div></div>
+              <p><button class="btn ok" style="width:100%" onclick="doRegister()">Create Account</button></p>`
+  };
+  const slides = [
+    ['📝', 'Create Quizzes in Minutes', 'A guided 4-step wizard with MCQ and True/False questions. Build quizzes with 3 to 20 questions.'],
+    ['⏱️', 'Live Timer, Auto-Submit', 'Students enter a quiz code and race a live countdown. When time is over, the quiz submits itself.'],
+    ['📊', 'Results & Excel Export', 'Edit student records, track every attempt and download everything to Excel in one click.'],
+    ['🏆', 'Instant Feedback', 'Detailed answer review for every attempt, and a celebration for every perfect score.']];
+  page(`<div class="auth">
+    <div class="slider"><div class="slides" id="slides">${slides.map(s => `<div class="slide"><div class="em">${s[0]}</div><h3>${s[1]}</h3><p>${s[2]}</p></div>`).join('')}</div>
+      <button class="sl-arrow l" onclick="slideTo(heroIdx-1)">‹</button><button class="sl-arrow r" onclick="slideTo(heroIdx+1)">›</button>
+      <div class="sl-dots" id="sldots">${slides.map((s, i) => `<i class="${i === 0 ? 'on' : ''}" onclick="slideTo(${i})"></i>`).join('')}</div></div>
+    <div class="card login-box"><h2 style="margin-bottom:14px">Welcome 👋</h2>
+      <div class="tabs">${['student', 'admin', 'register'].map(t => `<button class="${tab === t ? 'on' : ''}" onclick="showLogin('${t}')">${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}</div>
+      ${forms[tab]}</div></div>`);
+  heroIdx = 0; heroTimer = setInterval(() => slideTo(heroIdx + 1), 4500);
+}
+function slideTo(i) {
+  const n = 4, sl = $('slides');
+  if (!sl) { clearInterval(heroTimer); heroTimer = null; return; }
+  heroIdx = (i + n) % n; sl.style.transform = `translateX(-${heroIdx * 100}%)`;
+  document.querySelectorAll('#sldots i').forEach((d, k) => d.classList.toggle('on', k === heroIdx));
+}
+function doLogin(kind) {
+  const u = $('lu').value.trim(), p = $('lp').value;
+  let user = null;
+  if (kind === 'admin') { const a = new Admin(); if (u === a.username && a.checkPassword(p)) user = a; }
+  else { const s = sys.findStudent(u); if (s && s.checkPassword(p)) user = s; }
+  if (!user) return toast('Invalid username or password', true);
+  session = user;
+  sessionStorage.setItem('qms_session', JSON.stringify({ role: user.role, u: user.username }));
+  user.openDashboard();                           // polymorphism
+}
+function doRegister() {
+  const n = $('rn').value.trim(), r = $('rr').value.trim(), u = $('ru').value.trim(), p = $('rp').value;
+  const pg = $('rpg').value.trim(), sm = $('rsm').value, cl = $('rcl').value.trim(), ph = $('rph').value.trim();
+  if (!n || !r || !u || !p || !pg || !sm || !cl || !ph) return toast('Please fill all fields', true);
+  if (!validPhone(ph)) return toast('Enter a valid phone number (e.g. 03001234567)', true);
+  if (sys.findStudent(u) || u.toLowerCase() === 'admin') return toast('Username already taken', true);
+  sys.addStudent(new Student(u, p, n, r, { program: pg, semester: sm, cls: cl, phone: ph }));
+  toast('Registered! You can login now.'); showLogin('student');
+}
+function logout() { if (run && !run.done) return; session = null; sessionStorage.removeItem('qms_session'); showLogin(); }
+
+/* ------------------------------- ADMIN ------------------------------------- */
+function adminNav(cur) {
+  const items = [['home', '🏠 Dashboard'], ['create', '➕ Create Quiz'], ['manage', '📝 Manage Quizzes'], ['students', '👥 Student Data'], ['results', '📊 Results']];
+  return `<div class="nav">${items.map(([k, l]) => `<button class="btn ${cur === k ? 'on' : ''}" onclick="${k === 'create' ? 'newDraft()' : `showAdmin('${k}')`}">${l}</button>`).join('')}</div>`;
+}
+function showAdmin(p = 'home') {
+  if (p === 'home') {
+    const avg = sys.results.length ? Math.round(sys.results.reduce((a, r) => a + r.percent, 0) / sys.results.length) : 0;
+    page(`<div class="banner"><div><h2>Welcome back, Administrator 👋</h2><p>Manage quizzes, students and results from one place.</p></div>
+        <button class="btn light" onclick="newDraft()">➕ Create new quiz</button></div>
+      <div class="grid4">
+        <div class="stat"><span class="ic">📝</span><b data-count="${sys.quizzes.length}">0</b>Quizzes</div>
+        <div class="stat"><span class="ic">👥</span><b data-count="${sys.students.length}">0</b>Students</div>
+        <div class="stat"><span class="ic">✅</span><b data-count="${sys.results.length}">0</b>Attempts</div>
+        <div class="stat"><span class="ic">📈</span><b data-count="${avg}" data-suf="%">0%</b>Average score</div></div>
+      <div class="card"><h2>Quick actions</h2><div class="grid3" style="margin:0">
+        <div class="action" onclick="showAdmin('manage')"><span>📝</span><b>Manage quizzes</b><small>Edit or delete quizzes</small></div>
+        <div class="action" onclick="showAdmin('students')"><span>👥</span><b>Student data</b><small>View and edit records</small></div>
+        <div class="action" onclick="showAdmin('results')"><span>📊</span><b>Results</b><small>Filter by quiz code</small></div>
+        <div class="action" onclick="sys.exportStudents()"><span>⬇️</span><b>Students → Excel</b><small>Download CSV</small></div>
+        <div class="action" onclick="sys.exportResults()"><span>📥</span><b>Results → Excel</b><small>Download CSV</small></div></div></div>`, adminNav('home'));
+  } else if (p === 'manage') adminManage();
+  else if (p === 'students') adminStudents();
+  else if (p === 'results') adminResults();
+}
+
+/* ---- Quiz creation wizard: 4 pages ---- */
+function newDraft() { draft = { step: 1, title: '', minutes: 10, n: 5, questions: [], qi: 0, editing: false, editCode: null, cur: null }; renderWizard(); }
+function steps(cur) {
+  return `<div class="steps">${['1. Quiz Info', '2. Questions', '3. Review', '4. Done'].map((t, i) =>
+    `<div class="${i + 1 === cur ? 'on' : i + 1 < cur ? 'done' : ''}">${t}</div>`).join('')}</div>`;
+}
+function renderWizard() {
+  const d = draft;
+  if (d.step === 1) {
+    page(`<div class="card">${steps(1)}<h2>${d.editCode ? 'Edit' : 'Create'} Quiz – Information</h2>
+      <label>Quiz title</label><input type="text" id="qt" value="${esc(d.title)}" placeholder="e.g. OOP Mid Quiz">
+      <label>Time limit (drag the slider)</label>
+      <div class="range-wrap"><input type="range" id="qm" min="1" max="180" value="${d.minutes}" style="--p:${rangePct(d.minutes, 1, 180)}%" oninput="rangeUi(this,'qmv',' min')"><span class="range-val" id="qmv">${d.minutes} min</span></div>
+      <label>Number of questions (3 – 20)</label>
+      <div class="range-wrap"><input type="range" id="qn" min="3" max="20" value="${d.n}" style="--p:${rangePct(d.n, 3, 20)}%" ${d.editCode ? 'disabled' : ''} oninput="rangeUi(this,'qnv','')"><span class="range-val" id="qnv">${d.n}</span></div>
+      <p style="margin-top:24px"><button class="btn primary" onclick="wizStep1()">Next →</button>
+      ${d.editCode ? '<button class="btn" onclick="draft.step=3;renderWizard()">Back to review</button>' : ''}</p></div>`, adminNav('create'));
+  } else if (d.step === 2) {
+    if (!d.cur) { const q = d.questions[d.qi]; d.cur = q ? { type: q.type, text: q.text, opts: q.type === 'MCQ' ? [...q.choices] : ['', '', '', ''], correct: findCorrect(q) } : { type: 'MCQ', text: '', opts: ['', '', '', ''], correct: 0 }; }
+    const c = d.cur;
+    page(`<div class="card">${steps(2)}<h2>Question ${d.qi + 1} of ${d.n}</h2>
+      <div class="bar"><div style="width:${(d.qi + 1) / d.n * 100}%"></div></div>
+      <label>Question type</label>
+      <select id="qtype" onchange="readQ();draft.cur.type=this.value;renderWizard()">
+        <option value="MCQ" ${c.type === 'MCQ' ? 'selected' : ''}>Multiple choice (4 options)</option>
+        <option value="TF" ${c.type === 'TF' ? 'selected' : ''}>True / False</option></select>
+      <label>Question text</label><textarea id="qtext" rows="2">${esc(c.text)}</textarea>
+      ${c.type === 'MCQ'
+        ? [0, 1, 2, 3].map(i => `<label>Option ${LETTERS[i]}</label><div class="row"><input class="grow" type="text" id="qo${i}" value="${esc(c.opts[i])}">
+            <label style="margin:0"><input type="radio" name="corr" value="${i}" ${c.correct === i ? 'checked' : ''}> correct</label></div>`).join('')
+        : `<label>Correct answer</label><label style="margin:0"><input type="radio" name="corr" value="0" ${c.correct === 0 ? 'checked' : ''}> True</label>
+           <label style="margin:0"><input type="radio" name="corr" value="1" ${c.correct === 1 ? 'checked' : ''}> False</label>`}
+      <p><button class="btn" onclick="wizPrev()">← Back</button> <button class="btn primary" onclick="wizNext()">${d.editing || d.qi === d.n - 1 ? 'Save & Review →' : 'Next question →'}</button></p></div>`, adminNav('create'));
+  } else if (d.step === 3) {
+    page(`<div class="card">${steps(3)}<h2>Review</h2>
+      <p><b>${esc(d.title)}</b> · ${d.minutes} min · ${d.questions.length} questions
+      <button class="btn sm" onclick="draft.step=1;renderWizard()">Edit info</button></p>
+      ${d.questions.map((q, i) => `<div class="review"><b>${i + 1}. ${esc(q.text)}</b> <span class="badge ok">${q.type}</span><br>
+        <span class="muted">Correct: ${esc(q.correctText())}</span>
+        <button class="btn sm" style="float:right" onclick="draft.qi=${i};draft.cur=null;draft.editing=true;draft.step=2;renderWizard()">Edit</button></div>`).join('')}
+      <p><button class="btn ok" onclick="wizSave()">💾 Save Quiz</button> <button class="btn" onclick="showAdmin('home')">Cancel</button></p></div>`, adminNav('create'));
+  } else {
+    page(`<div class="card" style="text-align:center">${steps(4)}<h2>✅ Quiz ${d.editCode ? 'updated' : 'created'} successfully!</h2>
+      <p class="muted">Share this code with your students</p><div class="code-box" id="codebox">${esc(d.savedCode)}</div>
+      <p><button class="btn" onclick="navigator.clipboard&&navigator.clipboard.writeText('${d.savedCode}');toast('Code copied')">📋 Copy code</button>
+      <button class="btn primary" onclick="newDraft()">Create another</button>
+      <button class="btn" onclick="showAdmin('manage')">Manage quizzes</button></p></div>`, adminNav('create'));
+  }
+}
+function rangePct(v, min, max) { return (v - min) / (max - min) * 100; }
+function rangeUi(el, id, suf) { $(id).textContent = el.value + suf; el.style.setProperty('--p', rangePct(el.value, +el.min, +el.max) + '%'); }
+function findCorrect(q) { for (let i = 0; i < q.choices.length; i++) if (q.isCorrect(i)) return i; return 0; }
+function wizStep1() {
+  const t = $('qt').value.trim().replace(/\s+/g, ' '), m = +$('qm').value, n = +$('qn').value;
+  if (!t) return toast('Enter a quiz title', true);
+  if (!(m >= 1 && m <= 180)) return toast('Time must be 1–180 minutes', true);
+  if (!draft.editCode && !(Number.isInteger(n) && n >= 3 && n <= 20)) return toast('Questions must be between 3 and 20', true);
+  draft.title = t; draft.minutes = m;
+  if (draft.editCode) { draft.step = 3; renderWizard(); return; }
+  draft.n = n; draft.questions = draft.questions.slice(0, n); draft.qi = 0; draft.cur = null; draft.editing = false; draft.step = 2; renderWizard();
+}
+function readQ() {
+  const c = draft.cur; c.text = $('qtext').value;
+  if (c.type === 'MCQ') c.opts = [0, 1, 2, 3].map(i => $('qo' + i).value);
+  const r = document.querySelector('input[name=corr]:checked'); c.correct = r ? +r.value : 0;
+}
+function wizNext() {
+  readQ(); const c = draft.cur;
+  if (!c.text.trim()) return toast('Enter the question text', true);
+  let q;
+  if (c.type === 'MCQ') {
+    if (c.opts.some(o => !o.trim())) return toast('Fill all four options', true);
+    q = new MCQQuestion(c.text.trim(), c.opts.map(o => o.trim()), c.correct);
+  } else q = new TrueFalseQuestion(c.text.trim(), c.correct === 0);   // polymorphic storage
+  draft.questions[draft.qi] = q; draft.cur = null;
+  if (draft.editing || draft.qi === draft.n - 1) { draft.editing = false; draft.step = 3; }
+  else draft.qi++;
+  renderWizard();
+}
+function wizPrev() {
+  if (draft.cur) readQ();
+  if (draft.editing) { draft.editing = false; draft.cur = null; draft.step = 3; }
+  else if (draft.qi > 0) { draft.qi--; draft.cur = null; } else draft.step = 1;
+  renderWizard();
+}
+function wizSave() {
+  const d = draft;
+  if (d.questions.length < 3 || d.questions.length > 20 || d.questions.some(q => !q)) return toast('A quiz needs 3–20 complete questions', true);
+  if (d.editCode) {
+    const q = sys.findQuiz(d.editCode); q.title = d.title; q.minutes = d.minutes; q.questions = d.questions; sys.save(); d.savedCode = d.editCode;
+  } else { d.savedCode = sys.genCode(); sys.addQuiz(new Quiz(d.savedCode, d.title, d.minutes, d.questions)); }
+  d.step = 4; renderWizard();
+}
+
+/* ---- Manage quizzes ---- */
+function adminManage() {
+  page(`<div class="card"><h2>Manage Quizzes</h2>${sys.quizzes.length ? `<div class="table-scroll"><table>
+    <tr><th>#</th><th>Code</th><th>Title</th><th>Questions</th><th>Time</th><th>Attempts</th><th></th></tr>
+    ${sys.quizzes.map((q, i) => `<tr><td>${i + 1}</td><td><b>${esc(q.code)}</b></td><td>${esc(q.title)}</td><td>${q.count}</td><td>${q.minutes} min</td>
+      <td>${sys.results.filter(r => r.code === q.code).length}</td>
+      <td><button class="btn sm" onclick="editQuiz(${i})">Edit</button> <button class="btn sm danger" onclick="delQuiz(${i})">Delete</button></td></tr>`).join('')}
+    </table></div>` : '<p class="muted">No quizzes yet.</p>'}</div>`, adminNav('manage'));
+}
+function editQuiz(i) {
+  const q = sys.quizzes[i];
+  draft = { step: 3, title: q.title, minutes: q.minutes, n: q.count, questions: [...q.questions], qi: 0, editing: false, editCode: q.code, cur: null };
+  renderWizard();
+}
+function delQuiz(i) { if (confirm('Delete this quiz?')) { sys.removeQuiz(i); adminManage(); toast('Quiz deleted'); } }
+
+/* ---- Student data (editable) ---- */
+function adminStudents() {
+  page(`<div class="card"><h2>Student Data <span class="muted" style="font-size:14px">(edit and click Save)</span></h2>
+    <p><button class="btn ok" onclick="sys.exportStudents()">⬇ Download Students to Excel</button></p>${progDatalist}
+    <div class="table-scroll"><table><tr><th>#</th><th>Username</th><th>Full name</th><th>Roll no</th><th>Program</th><th>Semester</th><th>Class</th><th>Phone</th><th>Password</th><th>Attempts</th><th></th></tr>
+    ${sys.students.map((s, i) => `<tr><td>${i + 1}</td><td>${esc(s.username)}</td>
+      <td><input type="text" id="sn${i}" value="${esc(s.fullName)}" style="min-width:150px"></td><td><input type="text" id="sr${i}" value="${esc(s.roll)}" style="min-width:100px"></td>
+      <td><input type="text" id="spg${i}" list="proglist" value="${esc(s.program)}" style="min-width:170px"></td><td>${semSelect('ssm' + i, s.semester)}</td>
+      <td><input type="text" id="scl${i}" value="${esc(s.cls)}" style="min-width:70px"></td><td><input type="text" id="sph${i}" value="${esc(s.phone)}" style="min-width:130px"></td>
+      <td><input type="text" id="sp${i}" value="${esc(s.password)}" style="min-width:100px"></td><td>${sys.results.filter(r => r.username === s.username).length}</td>
+      <td style="white-space:nowrap"><button class="btn sm primary" onclick="saveStudent(${i})">Save</button> <button class="btn sm danger" onclick="delStudent(${i})">Delete</button></td></tr>`).join('')}
+    </table></div>${sys.students.length ? '' : '<p class="muted">No students registered yet.</p>'}</div>
+    <div class="card"><h2>Add Student</h2><div class="form3">
+      <div><label>Full name</label><input type="text" id="an"></div><div><label>Roll no</label><input type="text" id="ar"></div>
+      <div><label>Program</label><input type="text" id="apg" list="proglist"></div><div><label>Semester</label>${semSelect('asm', '')}</div>
+      <div><label>Class / Section</label><input type="text" id="acl"></div><div><label>Phone</label><input type="text" id="aph"></div>
+      <div><label>Username</label><input type="text" id="au"></div><div><label>Password</label><input type="text" id="ap"></div></div>
+      <p><button class="btn ok" onclick="addStudentAdmin()">➕ Add student</button></p></div>`, adminNav('students'));
+}
+function saveStudent(i) {
+  const s = sys.students[i], n = $('sn' + i).value.trim(), r = $('sr' + i).value.trim(), p = $('sp' + i).value;
+  const pg = $('spg' + i).value.trim(), sm = $('ssm' + i).value, cl = $('scl' + i).value.trim(), ph = $('sph' + i).value.trim();
+  if (!n || !r || !p || !pg || !sm || !cl || !ph) return toast('Fields cannot be empty', true);
+  if (!validPhone(ph)) return toast('Enter a valid phone number', true);
+  s.fullName = n; s.roll = r; s.password = p; s.program = pg; s.semester = sm; s.cls = cl; s.phone = ph;
+  sys.syncStudent(s); toast('Student updated');
+}
+function delStudent(i) { if (confirm('Delete this student?')) { sys.removeStudent(i); adminStudents(); toast('Student deleted'); } }
+function addStudentAdmin() {
+  const n = $('an').value.trim(), r = $('ar').value.trim(), u = $('au').value.trim(), p = $('ap').value.trim();
+  const pg = $('apg').value.trim(), sm = $('asm').value, cl = $('acl').value.trim(), ph = $('aph').value.trim();
+  if (!n || !r || !u || !p || !pg || !sm || !cl || !ph) return toast('Fill all fields', true);
+  if (!validPhone(ph)) return toast('Enter a valid phone number', true);
+  if (sys.findStudent(u) || u.toLowerCase() === 'admin') return toast('Username already exists', true);
+  sys.addStudent(new Student(u, p, n, r, { program: pg, semester: sm, cls: cl, phone: ph })); adminStudents(); toast('Student added');
+}
+
+/* ---- Results ---- */
+function adminResults(code = '') {
+  const list = sys.results.filter(r => !code || r.code === code);
+  page(`<div class="card"><h2>Quiz Results</h2><div class="row">
+    <select id="rf" style="max-width:260px" onchange="adminResults(this.value)"><option value="">All quizzes</option>
+      ${sys.quizzes.map(q => `<option value="${esc(q.code)}" ${q.code === code ? 'selected' : ''}>${esc(q.code)} – ${esc(q.title)}</option>`).join('')}</select>
+    <button class="btn ok" onclick="sys.exportResults('${esc(code)}')">⬇ Download Results to Excel</button></div><br>
+    <div class="table-scroll"><table><tr><th>Student</th><th>Roll</th><th>Program</th><th>Sem</th><th>Class</th><th>Quiz</th><th>Score</th><th>%</th><th>Time</th><th>Date</th></tr>
+    ${list.map(r => `<tr><td>${esc(r.name)}</td><td>${esc(r.roll)}</td><td>${dash(r.program)}</td><td>${dash(r.semester)}</td><td>${dash(r.cls)}</td><td>${esc(r.code)}</td><td>${r.score}/${r.total}</td>
+      <td><span class="badge ${r.percent >= 50 ? 'ok' : 'bad'}">${r.percent}%</span></td><td>${fmt(r.seconds)}</td><td>${esc(r.date)}</td></tr>`).join('')}
+    </table></div>${list.length ? '' : '<p class="muted">No results yet.</p>'}</div>`, adminNav('results'));
+}
+
+/* ------------------------------ STUDENT ------------------------------------ */
+function showStudent() {
+  const mine = sys.results.filter(r => r.username === session.username);
+  const avg = mine.length ? Math.round(mine.reduce((a, r) => a + r.percent, 0) / mine.length) : 0;
+  const best = mine.length ? Math.round(Math.max(...mine.map(r => r.percent))) : 0;
+  page(`<div class="banner"><div><h2>Welcome, ${esc(session.fullName)} 👋</h2><p>Enter your quiz code to begin</p><p class="chips"><span>🆔 ${esc(session.roll)}</span><span>🎓 ${dash(session.program)}</span><span>📚 Semester ${dash(session.semester)}</span><span>🏫 Class ${dash(session.cls)}</span><span>📞 ${dash(session.phone)}</span></p></div>
+      <div class="codeform"><input type="text" id="qc" placeholder="QZ1234" onkeydown="if(event.key==='Enter')enterCode()"><button class="btn light" onclick="enterCode()">Start →</button></div></div>
+    <div class="grid3"><div class="stat"><span class="ic">🧾</span><b data-count="${mine.length}">0</b>Quizzes attempted</div>
+      <div class="stat"><span class="ic">📈</span><b data-count="${avg}" data-suf="%">0%</b>Average score</div>
+      <div class="stat"><span class="ic">🏅</span><b data-count="${best}" data-suf="%">0%</b>Best score</div></div>
+    <div class="card"><h2>My Results</h2>${mine.length ? `<div class="table-scroll"><table><tr><th>Quiz</th><th>Title</th><th>Score</th><th>%</th><th>Time</th><th>Date</th></tr>
+      ${mine.map(r => `<tr><td>${esc(r.code)}</td><td>${esc(r.title)}</td><td>${r.score}/${r.total}</td><td><span class="badge ${r.percent >= 50 ? 'ok' : 'bad'}">${r.percent}%</span></td><td>${fmt(r.seconds)}</td><td>${esc(r.date)}</td></tr>`).join('')}
+      </table></div>` : '<p class="muted">You have not attempted any quiz yet.</p>'}</div>
+    <div class="card"><h2>Change Password</h2><div class="row"><input class="grow" type="password" id="op" placeholder="Current password">
+      <input class="grow" type="password" id="np" placeholder="New password"><button class="btn" onclick="changePw()">Update</button></div></div>`);
+}
+function changePw() {
+  if (!session.checkPassword($('op').value)) return toast('Current password is wrong', true);
+  if (!$('np').value) return toast('Enter a new password', true);
+  session.password = $('np').value; sys.save(); toast('Password changed'); showStudent();
+}
+function enterCode() {
+  const code = $('qc').value.trim().toUpperCase(), q = sys.findQuiz(code);
+  if (!q) return toast('Invalid quiz code', true);
+  if (sys.hasAttempted(session.username, q.code)) return toast('You have already attempted this quiz', true);
+  page(`<div class="card" style="max-width:600px;margin:30px auto;text-align:center"><h2>${esc(q.title)}</h2>
+    <div class="grid3" style="margin:20px 0"><div class="stat"><b>${q.count}</b>Questions</div><div class="stat"><b>${q.minutes}</b>Minutes</div></div>
+    <p class="muted">The timer starts when you press Start. When time is over the quiz is submitted automatically.<br>You can attempt this quiz only once.</p>
+    <button class="btn" onclick="showStudent()">Cancel</button> <button class="btn ok" onclick="startQuiz('${esc(q.code)}')">▶ Start Quiz</button></div>`);
+}
+
+/* ---- Quiz runner with live timer ---- */
+function startQuiz(code) {
+  const q = sys.findQuiz(code);
+  run = { q, idx: 0, answers: new Array(q.count).fill(null), start: Date.now(), endAt: Date.now() + q.minutes * 60000, timer: null, done: false };
+  window.onbeforeunload = () => 'Quiz in progress!';
+  renderQuestion(); run.timer = setInterval(tick, 250); tick();
+}
+function tick() {
+  if (!run || run.done) return;
+  const total = run.q.minutes * 60, left = Math.max(0, Math.ceil((run.endAt - Date.now()) / 1000)), el = $('timer'), tb = $('timebar');
+  if (el) { el.textContent = '⏱ ' + fmt(left); el.classList.toggle('low', left <= 30); }
+  if (tb) { tb.firstElementChild.style.width = (left / total * 100) + '%'; tb.classList.toggle('low', left <= 30); }
+  if (left <= 0) finishQuiz(true);
+}
+function renderNav() {
+  $('qnav').innerHTML = run.answers.map((a, i) => `<span class="${a !== null ? 'ans' : ''} ${i === run.idx ? 'cur' : ''}" onclick="goQ(${i})">${i + 1}</span>`).join('');
+}
+function renderQuestion() {
+  const q = run.q.questions[run.idx], last = run.idx === run.q.count - 1;
+  page(`<div class="card qcard ${(run.dir || 1) > 0 ? 'in-r' : 'in-l'}"><div class="row" style="justify-content:space-between"><div><b>${esc(run.q.title)}</b><br>
+      <span class="muted">Question ${run.idx + 1} of ${run.q.count}</span></div><div class="timer" id="timer">⏱ --:--</div></div>
+    <div class="timebar" id="timebar"><div style="width:100%"></div></div>
+    <div class="bar"><div style="width:${(run.idx + 1) / run.q.count * 100}%"></div></div>
+    <h2 style="margin-top:22px">${esc(q.text)}</h2>${q.render(run.answers[run.idx])}
+    <div class="row" style="margin-top:20px"><button class="btn" ${run.idx === 0 ? 'disabled' : ''} onclick="goQ(run.idx-1)">← Previous</button><span class="grow"></span>
+      ${last ? '<button class="btn ok" onclick="submitQuiz()">Submit Quiz ✔</button>' : '<button class="btn primary" onclick="goQ(run.idx+1)">Next →</button>'}</div>
+    <div class="dots" id="qnav"></div></div>`, '', true);
+  renderNav(); tick();
+}
+function pick(i) { run.answers[run.idx] = i; renderNav(); document.querySelectorAll('.opt').forEach((el, k) => el.classList.toggle('sel', k === i)); }
+function goQ(i) { if (i >= 0 && i < run.q.count) { run.dir = i >= run.idx ? 1 : -1; run.idx = i; renderQuestion(); } }
+function submitQuiz() {
+  const un = run.answers.filter(a => a === null).length;
+  if (un && !confirm(`${un} question(s) unanswered. Submit anyway?`)) return;
+  finishQuiz(false);
+}
+function finishQuiz(timeUp) {
+  if (!run || run.done) return;
+  run.done = true; clearInterval(run.timer); window.onbeforeunload = null;
+  const q = run.q; let score = 0;
+  q.questions.forEach((qu, i) => { if (run.answers[i] !== null && qu.isCorrect(run.answers[i])) score++; });   // polymorphic check
+  const seconds = Math.min(Math.round((Date.now() - run.start) / 1000), q.minutes * 60);
+  sys.addResult(new Result({ username: session.username, name: session.fullName, roll: session.roll, program: session.program, semester: session.semester, cls: session.cls, phone: session.phone, code: q.code, title: q.title, score, total: q.count, seconds, date: new Date().toLocaleString() }));
+  lastRun = { q, answers: run.answers, score, seconds, timeUp };
+  run = null;
+  score === q.count ? showCongrats() : showResult();
+}
+function showCongrats() {
+  const colors = ['#fbbf24', '#f472b6', '#34d399', '#60a5fa', '#fff', '#f87171'];
+  const conf = Array.from({ length: 90 }, () => `<i class="confetti" style="left:${Math.random() * 100}%;background:${colors[Math.floor(Math.random() * 6)]};
+    animation-duration:${2 + Math.random() * 3}s;animation-delay:${Math.random() * 3}s"></i>`).join('');
+  $('app').innerHTML = `<div class="congrats">${conf}<div class="trophy">🏆</div><h1>CONGRATULATIONS!</h1>
+    <h2>${esc(session.fullName)}, you answered every question correctly!</h2><p style="font-size:22px">Perfect score: ${lastRun.score} / ${lastRun.q.count} · Time ${fmt(lastRun.seconds)}</p>
+    <button class="btn" style="margin-top:14px;font-size:17px;z-index:2" onclick="showResult()">View result</button></div>`;
+}
+function showResult() {
+  const { q, answers, score, seconds, timeUp } = lastRun, pct = Math.round(1000 * score / q.count) / 10;
+  page(`<div class="card" style="text-align:center">${timeUp ? '<p><span class="badge bad">⏰ Time is up!</span></p>' : ''}
+    <h2>${esc(q.title)} – Result</h2><div class="ring" style="--pct:${pct}"><span>${score}/${q.count}</span></div><p>${pct}% · Time taken ${fmt(seconds)}</p>
+    <button class="btn primary" onclick="showStudent()">Back to dashboard</button></div>
+    <div class="card"><h2>Answer review</h2>${q.questions.map((qu, i) => {
+      const a = answers[i], ok = a !== null && qu.isCorrect(a);
+      return `<div class="review ${ok ? 'ok' : 'bad'}"><b>${i + 1}. ${esc(qu.text)}</b><br>
+        Your answer: ${a === null ? '<i>not answered</i>' : esc(qu.choices[a])} ${ok ? '✔' : '✘'}
+        ${ok ? '' : `<br><span class="muted">Correct answer: ${esc(qu.correctText())}</span>`}</div>`; }).join('')}</div>`);
+}
+
+/* ------------------------------ THEMES ------------------------------------ */
+const THEMES = [['university', 'University Classic', '#1e3a8a'], ['ocean', 'Ocean', '#0369a1'], ['emerald', 'Emerald', '#047857'],
+                ['sunset', 'Sunset', '#ea580c'], ['royal', 'Royal Purple', '#6d28d9'], ['dark', 'Dark Mode', '#111827']];
+let heroTimer = null, heroIdx = 0;
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem('qms_theme', t); } catch (e) {}
+  document.querySelectorAll('.swatch').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+}
+function themePicker() {
+  const cur = document.documentElement.dataset.theme || 'university';
+  return `<div class="themes">${THEMES.map(([k, n, c]) => `<button class="swatch ${k === cur ? 'on' : ''}" data-t="${k}" title="${n}" style="background:${c}" onclick="setTheme('${k}')"></button>`).join('')}</div>`;
+}
+function runCounters() {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const to = +el.dataset.count, suf = el.dataset.suf || '', t0 = performance.now();
+    const step = t => { const p = Math.min(1, (t - t0) / 900); el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))) + suf; if (p < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+}
+document.addEventListener('click', e => {            // button ripple effect
+  const b = e.target.closest && e.target.closest('.btn');
+  if (!b || b.disabled) return;
+  const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height), sp = document.createElement('span');
+  sp.className = 'ripple'; sp.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
+  b.appendChild(sp); setTimeout(() => sp.remove(), 600);
+});
+try { setTheme(localStorage.getItem('qms_theme') || 'university'); } catch (e) {}
+
+(function init() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem('qms_session'));
+    if (s) {
+      if (s.role === 'Admin') session = new Admin(); else session = sys.findStudent(s.u) || null;
+    }
+  } catch (e) {}
+  session ? session.openDashboard() : showLogin();
+})();
+</script>
+</body>
+</html>
